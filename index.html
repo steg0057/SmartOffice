@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Интерактивная карта здания</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <!-- UIkit CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.17.1/dist/css/uikit.min.css" />
+
+<!-- UIkit JS -->
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.17.1/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.17.1/dist/js/uikit-icons.min.js"></script>
+    
+    <!--style-->
+    
+    <style>
+        #map-container {
+            display: flex;
+            align-items: stretch;
+        }
+
+        #map {
+            width: 800px;
+            height: 550px;
+        }
+
+        #info {
+            background-color: #f9f9f9;
+            padding: 10px;
+            flex: 1;
+        }
+
+        .office-info {
+            margin-bottom: 10px;
+        }
+
+        .office-info img {
+            width: 16px;
+            height: 16px;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+    
+<!--Body-->
+    
+<body>
+  <h1>Интерактивная карта здания</h1>
+    <div id="map-container">
+        <div id="map"></div>
+        <div id="info">
+            <div class="office-info">
+                <h3>Офис 1</h3>
+                <p><img src="http://127.0.0.1:8000/men"> 10 человек</p>
+                <p><img src="http://127.0.0.1:8000/pc"> Есть телевизор</p>
+                <a href="http://127.0.0.1:8000/close?o=1"><button id="office1-button"class="uk-button uk-button-primary">Забронировать</button></a>
+                <hr>
+            </div>
+            <div class="office-info">
+                <h3>Офис 2</h3>
+                <p><img src="http://127.0.0.1:8000/men"> 10 человек</p>
+                <p><img src="http://127.0.0.1:8000/pc"> Есть телевизор</p>
+                <a href="http://127.0.0.1:8000/close?o=2"><button id="office2-button"class="uk-button uk-button-primary">Забронировать</button></a>
+                <hr>
+            </div>
+            <div class="office-info">
+                <h3>Офис 3</h3>
+                <p><img src="http://127.0.0.1:8000/meng"> 10 человек</p>
+                <p><img src="http://127.0.0.1:8000/pc"> Есть телевизор</p>
+                <a href="http://127.0.0.1:8000/close?o=3"><button id="office3-button"class="uk-button uk-button-primary">Забронировать</button></a>
+                <hr>
+            </div>
+            <div class="office-info">
+                <h3>Офис 4</h3>
+                <p><img src="http://127.0.0.1:8000/men"> 10 человек</p>
+                <p><img src="http://127.0.0.1:8000/pc"> Есть телевизор</p>
+                <a href="http://127.0.0.1:8000/close?o=4"><button id="office4-button"class="uk-button uk-button-primary">Забронировать</button></a>
+                <hr>
+            </div>
+        </div>
+    </div>
+    
+<!--JS-->
+    
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script>
+    // Функция для обновления состояния кнопки
+    function updateButtonState() {
+        // Отправить запрос на сервер для получения состояния кнопок
+        fetch('http://127.0.0.1:8000/empty')
+            .then(response => response.json())
+            .then(dat => {
+                const data = dat.length ? JSON.parse(dat[0]) : '';
+                console.log('---- data')
+                console.log(data)
+                console.log(data.office1)
+                console.log(data["office1"])
+                
+                // Обновите текст на кнопках в соответствии с состоянием
+                if (data["office1"]==true) {
+                    document.querySelector('#office1-button').textContent = 'Занято';
+                    console.log(document.querySelector('#office1-button').textContent);
+                    console.log("Yes");
+                }
+                if (data.office2) {
+                    document.querySelector('#office2-button').textContent = 'Занято';
+                }
+                if (data.office3) {
+                    document.querySelector('#office3-button').textContent = 'Занято';
+                }
+                if (data.office4) {
+                    document.querySelector('#office4-button').textContent = 'Занято';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка при обновлении состояния кнопок:', error);
+            });
+    }
+
+    // Вызовите функцию при загрузке страницы
+    window.addEventListener('load', updateButtonState);
+</script>
+<script>
+    var map = L.map('map').setView([65, 128], 2);
+
+    var imageUrl = 'http://127.0.0.1:8000/map';
+    var imageBounds = [[0, 0], [1000, 250]];
+
+    L.imageOverlay(imageUrl, imageBounds).addTo(map);
+
+    // Создайте прямоугольные области
+    var office1 = L.rectangle([[83.5, 154], [80, 172]], { color: "blue", weight: 2 }).addTo(map);
+    var office2 = L.rectangle([[75,   154], [80, 172]], { color: "green", weight: 2 }).addTo(map);
+    var office3 = L.rectangle([[58.5, 145], [48, 165]], { color: "red", weight: 2 }).addTo(map);
+    var office4 = L.rectangle([[66,   219], [38, 235]], { color: "orange", weight: 2 }).addTo(map);
+
+    office1.bindPopup('Офис 1');
+    office2.bindPopup('Офис 2');
+    office3.bindPopup('Офис 3');
+    office4.bindPopup('Офис 4');
+</script>
+</body>
+</html>
